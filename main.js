@@ -1,22 +1,59 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
-const path = require('path')
+const path = require('path');
 
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
     }
   })
 
+
+  win.webContents.session.on(
+    "select-serial-port",
+    (event, portList, webContents, callback) => {
+      event.preventDefault();
+      console.info("select-serial-port", portList, callback.name);
+      if (portList && portList.length > 0) {
+        callback(portList[0].portId);
+      } else {
+        console.error("No port found");
+        callback(); //"Could not find any matching devices"
+      }
+    }
+  );
+
+  win.webContents.session.on("serial-port-added", (event, port) => {
+    console.info("serial-port-added FIRED WITH", port);
+  });
+
+  win.webContents.session.on("serial-port-removed", (event, port) => {
+    console.info("serial-port-removed FIRED WITH", port);
+  });
+
+  win.webContents.session.setPermissionCheckHandler(
+    (webContents, permission, requestingOrigin, details) => {
+      if (permission === "serial" && details.securityOrigin === "file:///") {
+        return true;
+      }
+    }
+  );
+
+  win.webContents.session.setDevicePermissionHandler((details) => {
+    if (details.deviceType === "serial" && details.origin === "file://") {
+      return true;
+    }
+  });
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  win.loadFile('index.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  win.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
