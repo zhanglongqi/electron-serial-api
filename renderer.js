@@ -4,6 +4,26 @@
 // `nodeIntegration` is turned off. Use `preload.js` to
 // selectively enable features needed in the rendering
 // process.
+navigator.serial.addEventListener("connect", (e) => {
+	// Connect to `e.target` or add it to a list of available ports.
+	console.info("event connect", e);
+});
+
+navigator.serial.addEventListener("disconnect", (e) => {
+	// Remove `e.target` from the list of available ports.
+	console.info("event disconnect", e);
+});
+
+navigator.serial.getPorts().then((ports) => {
+	// Initialize the list of available ports with `ports` on page load.
+	console.info("mounted getPorts", ports);
+	ports.forEach((port) => {
+		let port_info = port.getInfo();
+		if (port_info && Object.keys(port_info).length > 0) {
+			console.info(port_info);
+		}
+	});
+});
 
 async function testIt() {
   const portsExistingPermissions = await navigator.serial.getPorts();
