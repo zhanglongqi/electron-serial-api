@@ -17,6 +17,11 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^19.0.5"
+    "electron": "^20.0.2"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "useTabs": true,
+    "tabWidth": 2
   }
 }

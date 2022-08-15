@@ -26,26 +26,26 @@ navigator.serial.getPorts().then((ports) => {
 });
 
 async function testIt() {
-  const portsExistingPermissions = await navigator.serial.getPorts();
-  console.log("Existing port permissions: ");
-  portsExistingPermissions.forEach((port) => {
-    console.log(port.getInfo());
-  });
-	
-  const filters = [
-    { usbVendorId: 0x0403, usbProductId: 0x6001 }, // FTDI
-    { usbVendorId: 0x1a86, usbProductId: 0x7523 }, // CH340
-    { usbVendorId: 0x2341, usbProductId: 0x0043 }, // Arduino Uno
-    { usbVendorId: 0x2341, usbProductId: 0x0001 }, // Arduino Uno
-  ];
+	const portsExistingPermissions = await navigator.serial.getPorts();
+	console.log("Existing port permissions: ");
+	portsExistingPermissions.forEach((port) => {
+		console.log(port.getInfo());
+	});
 
-  const port = await navigator.serial.requestPort({ filters });
-  console.log("Selected port", port.getInfo());
-  const portsUpdatedPermissions = await navigator.serial.getPorts();
-  console.log("Port permissions after navigator.serial.requestPort:");
-  portsUpdatedPermissions.forEach((port) => {
-    console.log(port.getInfo());
-  });
+	const filters = [
+		{ usbVendorId: 0x0403, usbProductId: 0x6001 }, // FTDI
+		{ usbVendorId: 0x1a86, usbProductId: 0x7523 }, // CH340
+		{ usbVendorId: 0x2341, usbProductId: 0x0043 }, // Arduino Uno
+		{ usbVendorId: 0x2341, usbProductId: 0x0001 }, // Arduino Uno
+	];
+
+	const port = await navigator.serial.requestPort({ filters });
+	console.log("Selected port", port.getInfo());
+	const portsUpdatedPermissions = await navigator.serial.getPorts();
+	console.log("Port permissions after navigator.serial.requestPort:");
+	portsUpdatedPermissions.forEach((port) => {
+		console.log(port.getInfo());
+	});
 }
 
 document.getElementById("clickme").addEventListener("click", testIt);
