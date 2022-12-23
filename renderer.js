@@ -24,8 +24,9 @@ navigator.serial.getPorts().then((ports) => {
 		}
 	});
 });
+let port_selected = null;
 
-async function testIt() {
+async function request_ports() {
 	const portsExistingPermissions = await navigator.serial.getPorts();
 	console.log("Existing port permissions: ");
 	portsExistingPermissions.forEach((port) => {
@@ -33,19 +34,51 @@ async function testIt() {
 	});
 
 	const filters = [
+		{ usbVendorId: 0x10c4, usbProductId: 0xea60 }, // Silicon Labs CP210x
+		{ usbVendorId: 0x0403, usbProductId: 0x6015 }, // FTDI
 		{ usbVendorId: 0x0403, usbProductId: 0x6001 }, // FTDI
 		{ usbVendorId: 0x1a86, usbProductId: 0x7523 }, // CH340
+		{ usbVendorId: 0x1a86, usbProductId: 0x55d3 }, // QinHeng Electronics USB Single Serial Ch343
 		{ usbVendorId: 0x2341, usbProductId: 0x0043 }, // Arduino Uno
 		{ usbVendorId: 0x2341, usbProductId: 0x0001 }, // Arduino Uno
 	];
 
 	const port = await navigator.serial.requestPort({ filters });
 	console.log("Selected port", port.getInfo());
+	port_selected = port;
 	const portsUpdatedPermissions = await navigator.serial.getPorts();
 	console.log("Port permissions after navigator.serial.requestPort:");
 	portsUpdatedPermissions.forEach((port) => {
-		console.log(port.getInfo());
+		const info = port.getInfo();
+		if (info.usbProductId > 0) {
+			console.info(info);
+			// confirm(`usbProductId: ${info.usbProductId}, usbVendorId: ${info.usbVendorId}`);
+		}
 	});
 }
 
-document.getElementById("clickme").addEventListener("click", testIt);
+function open_port() {
+	if (port_selected == null) {
+		alert("please select a port first");
+		return;
+	} else {
+		port_selected
+			.open({
+				baudRate: 9600,
+				dataBits: 8,
+				parity: "none",
+				stopBits: 1,
+				flowControl: "none",
+			})
+			.then(() => {
+				const info = port_selected.getInfo();
+				console.info(`port ${info.usbVendorId}:${info.usbProductId} is opened`);
+				confirm(`port ${info.usbVendorId}:${info.usbProductId} is opened`);
+			})
+			.catch((error) => {
+				alert(`open_port error: ${error}`);
+			});
+	}
+}
+document.getElementById("request_ports").addEventListener("click", request_ports);
+document.getElementById("open_port").addEventListener("click", open_port);
